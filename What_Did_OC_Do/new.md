@@ -22,9 +22,9 @@ struct objc_object {
 private:
 	isa_t isa;
 public:
-	//公有方法
+	// 公有方法
 private:
-	//私有方法
+	// 私有方法
 }
 
 union isa_t {
@@ -81,7 +81,7 @@ struct objc_class : objc_object {
 	Class superclass;
 	cache_t cache;
 	class_data_bits_t bits;
-	//公有方法
+	// 公有方法
 }
 ```
 
@@ -104,49 +104,139 @@ struct class_data_bits_t {
 	friend objc_class;
 	uintptr_t bits;
 private:
-	//私有方法
+	// 私有方法
 public:
-	//公有方法
+	// 公有方法
 }
 ```
 
 `class_data_bits_t`只包含一个可以作位操作的`uintptr_t`位序列，当其中包含着各种标记位以及指向`objc_class`类具体内容的指针。如`objc_class`的`data()`方法，会调用`class_data_bits_t`的同名方法，位运算返回一个指向`class_rw_t`的指针：
 
 ```c++
-//in objc_class
+// in objc_class
 class_rw_t *data() const {
 	return bits.data();
 }
 
-//in class_data_bits_t
+// in class_data_bits_t
 class_rw_t* data() const {
 	return (class_rw_t *)(bits & FAST_DATA_MASK);
 }
 ```
 
-`class_rw_t`结构体则存储着一个Class的主要信息：
+`class_rw_t`持有`class_ro_t`，`class_ro_t`则存储Class在编译期间已经确定的信息，二者都包含Class的方法，属性，协议等信息，但存储的方式不同：
 
 ```c++
-struct class_rw_t {
-    // Be warned that Symbolication knows the layout of this structure.
-    uint32_t flags;
-    uint16_t version;
-    uint16_t witness;
+// read_only
+struct class_ro_t {
+    method_list_t * baseMethodList;
+    protocol_list_t * baseProtocols;
+    const ivar_list_t * ivars;
 
-    const class_ro_t *ro;
-
-    method_array_t methods;			//方法列表
-    property_array_t properties;	//属性列表
-    protocol_array_t protocols;		//协议列表
-
-    Class firstSubclass;
-    Class nextSiblingClass;
-
-    char *demangledName;
-
-#if SUPPORT_INDEXED_ISA
-    uint32_t index;
-#endif
+    property_list_t *baseProperties;
+    
+    // others
 };
 ```
+
+`xxx_list_t`类型全部继承于`entsize_list_tt`，其维护一个在内存中紧密排列的`xxx_t`的数组结构，并持有一个迭代器用于操作元素。
+
+#### method_t
+
+```c++
+struct method_t {
+    SEL name;			// typedef struct objc_selector *SEL; 方法名
+    const char *types;	// 方法返回值与参数类型
+    MethodListIMP imp;	// using MethodListIMP = IMP; 方法体指针
+
+    struct SortBySELAddress :
+        public std::binary_function<const method_t&,
+                                    const method_t&, bool>
+    {
+        bool operator() (const method_t& lhs,
+                         const method_t& rhs)
+        { return lhs.name < rhs.name; }
+    };
+};
+
+typedef struct method_t *Method;
+```
+
+#### ivar_t
+
+```c++
+struct ivar_t {
+    int32_t *offset;
+    const char *name;
+    const char *type;
+    // alignment is sometimes -1; use alignment() instead
+    uint32_t alignment_raw;
+    uint32_t size;
+
+    uint32_t alignment() const {
+        if (alignment_raw == ~(uint32_t)0) return 1U << WORD_SHIFT;
+        return 1 << alignment_raw;
+    }
+};
+
+typedef struct ivar_t *Ivar;
+```
+
+#### property_t 
+
+```c++
+struct property_t {
+    const char *name;
+    const char *attributes;
+};
+
+typedef struct property_t *objc_property_t;
+```
+
+#### protocol_t
+
+```c++
+struct protocol_t : objc_object {
+    const char *mangledName;
+    struct protocol_list_t *protocols;
+    method_list_t *instanceMethods;
+    method_list_t *classMethods;
+    method_list_t *optionalInstanceMethods;
+    method_list_t *optionalClassMethods;
+    property_list_t *instanceProperties;
+    uint32_t size;   // sizeof(protocol_t)
+    uint32_t flags;
+    // Fields below this point are not always present on disk.
+    const char **_extendedMethodTypes;
+    const char *_demangledName;
+    property_list_t *_classProperties;
+	
+	// 公有方法
+}
+
+typedef struct property_t *objc_property_t;
+```
+
+持有`class_ro_t`的`class_rw_t`则为Class提供运行时的拓展能力
+
+```c++
+// read_write
+struct class_rw_t {
+	const class_ro_t *ro;
+
+    method_array_t methods;
+    property_array_t properties;
+    protocol_array_t protocols;
+      
+    // others
+}
+```
+
+`xxx_array_t`类全部继承自`list_array_tt <xxx_t, xxx_list_t>`类，该类使用联合体存储三类不同的值：
+
+1. 空
+2. 单个`xxx_list_t`的指针
+3. 一个存有多个`xxx_list_t`指针的数组
+
+类别Category的原理就是在运行时将Category持有的`xxx_list_t`指针添加到对应`class_rw_t`的`xxx_array_t`中。
 
