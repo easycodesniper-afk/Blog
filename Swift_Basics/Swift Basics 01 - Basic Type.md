@@ -29,6 +29,78 @@ print(type(of: a))		// Bool
 
 > 非布尔型变量用于布尔判断会报编译错误
 
+## 字符与字符串
+
+### 初始化
+
+字符使用`Character` 类型，字符串使用`String`类型。字符与字符串全部使用双引号初始化，在没有指定具体类型时，单个字符默认为`String`：
+
+```swift
+let a = "a"
+let b: Character = "b"
+
+print(type(of: a))		// String
+print(type(of: b))		// Character
+```
+
+> `String`为值类型。
+
+使用加号可直接组合多个`String`，使用`append()`方法在`String`末尾添加一个字符：
+
+```swift
+let string1 = "hello"
+let string2 = " there"
+var string3 = string1 + string2		// "hello there"
+
+let ch: Character = "!"
+string3.append(ch)		// "hello there!"
+```
+
+使用`\(expression)`的形式在字符串中插入内容：
+
+```swift
+let a = 32
+let b = "a is \(a)"								// "a is 32"
+let c = "3 times a is \(3 * a)"		// "3 times a is 96"
+```
+
+### 字符串索引
+
+因为存在Unicode字符等复杂情况，不可以单纯的使用整型值用于字符串的下标索引，要使用`String`的关联类型`String.Index`。
+
+所有`String`值都有两个`String.Index`类型的属性：`startIndex`与`endIndex`。`startindex`指向`String`值**第一个字符的位置**，`endIndex`指向**最后一个字符的后一个位置**（并非最后一个字符的位置），类似`C++ STL`中枚举器的`begin()`方法与`end()`方法。
+
+> 空字符串的`startIndex`与`endIndex`相等。
+
+在`startIndex`与`endIndex`的基础上，使用以下三个方法获取其余位置的索引：
+
+- `func index(before i: String.Index) -> String.Index`
+- `func index(after i: String.Index) -> String.Index`
+- `func index(_ i: String.Index, offsetBy n: String.IndexDistance) -> String.Index`
+
+```swift
+let str = "leap of faith"
+
+str[str.startIndex]		// l
+str[str.index(before: ss.endIndex)]		// h
+str[str.index(after: ss.startIndex)]	// e
+
+let index = str.index(str.startIndex, offsetBy: 8)
+str[index]		// f
+```
+
+字符串的`indices`属性包含该字符串的所有字符的索引：
+
+```swift
+for index in str.indices {
+  print("\(str[index]) ", terminator: "")		// l e a p   o f   f a i t h 
+}
+```
+
+> 访问非法位置的索引会产生运行时错误。
+>
+> 索引属性可用于所有遵守`Collection`协议的集合类型。
+
 ## 元组
 
 随意组合已知类型为一个元组（tuple），可以使用下标取元组中的值：

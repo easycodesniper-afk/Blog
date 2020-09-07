@@ -115,3 +115,19 @@ print(type(of: num3))		// Int
 ```
 
 隐式拆箱的`Optional`数据只可用于定义不会为空的常量或变量。如果对空数据隐式拆箱，同样会触发运行时错误。
+
+### Nil-Coalescing Operator
+
+可以使用双问号`??`来对`Optional` 数据进行带默认值的拆箱操作：
+
+```swift
+var num: Int? = 7
+var realNum = num ?? 9
+print(type(of: realNum), realNum)	// Int 7
+
+var num2: Int?
+realNum = num2 ?? 22
+print(type(of: realNum), realNum)	// Int 22
+```
+
+如上所示，如果`Optional`数据包含合理值，那么`??`会将数据拆箱赋给另一常量或变量。否则，会将双问号后面的默认值赋给数据。
