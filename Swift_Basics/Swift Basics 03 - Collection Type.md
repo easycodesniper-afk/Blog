@@ -69,7 +69,7 @@ sList.removeLast()		// 移除最后一个元素
 
 ```swift
 for item in sList {
-		print(item)
+	print(item)
 }
 ```
 
@@ -77,7 +77,7 @@ for item in sList {
 
 ```swift
 for (index, value) in sList.enumerated() {
-		print(index, value)
+	print(index, value)
 }
 ```
 
@@ -109,7 +109,7 @@ dic[3] = "Three"
 
 dic.updateValue("four", forKey:4)
 
-dic = [:]			// 已明确键值类型时，可直接置空，同Array
+dic = [:]		// 已明确键值类型时，可直接置空，同Array
 
 // 删：
 dic[3] = nil
@@ -139,7 +139,7 @@ for k in dic.keys {
 
 // 只遍历值
 for v in dic.values {
-		print(v)
+	print(v)
 }
 ```
 

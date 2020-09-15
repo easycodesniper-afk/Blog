@@ -90,7 +90,7 @@ if let realNum = num {
 var num: Int? = 7
 
 if let realNum = num, var otherNum = Int("32"), otherNum <= 33 {
-    print(type(of: realNum), realNum)			// Int 7
+    print(type(of: realNum), realNum)		// Int 7
 
     otherNum += 1
     print(type(of: otherNum), otherNum)		// Int 32
@@ -105,13 +105,13 @@ if let realNum = num, var otherNum = Int("32"), otherNum <= 33 {
 
 ```swift
 var num: Int! = 7
-print(type(of: num))		// Optional<Int>
+print(type(of: num))	// Optional<Int>
 
 var num2 = num
-print(type(of: num2))		// Optional<Int>
+print(type(of: num2))	// Optional<Int>
 
 var num3: Int = num
-print(type(of: num3))		// Int
+print(type(of: num3))	// Int
 ```
 
 隐式拆箱的`Optional`数据只可用于定义不会为空的常量或变量。如果对空数据隐式拆箱，同样会触发运行时错误。

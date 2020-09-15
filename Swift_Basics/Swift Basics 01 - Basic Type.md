@@ -60,7 +60,7 @@ string3.append(ch)		// "hello there!"
 
 ```swift
 let a = 32
-let b = "a is \(a)"								// "a is 32"
+let b = "a is \(a)"					// "a is 32"
 let c = "3 times a is \(3 * a)"		// "3 times a is 96"
 ```
 
@@ -108,7 +108,7 @@ for index in str.indices {
 ```swift
 let http404Error = (404, "Not Found")
 
-print(type(of: http404Error))										// (Int, String)
+print(type(of: http404Error))		// (Int, String)
 print("the status code is \(http404Error.0)")		// the status code is 404
 ```
 
@@ -116,7 +116,7 @@ print("the status code is \(http404Error.0)")		// the status code is 404
 
 ```swift
 let (statusCode, statusMessage) = http404Error
-print("the status code is \(statusCode)")				// the status code is 404
+print("the status code is \(statusCode)")		// the status code is 404
 
 let (_, statusMessage) = http404Error
 print("the status message is \(statusMessage)")	// the status message is Not Found
